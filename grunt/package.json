@@ -1,0 +1,19 @@
+{
+    "name": "seoify",
+    "version": "0.1.0",
+    "author": {
+        "name": "FlowStateDigital",
+        "email": "dev@flowstatedigital.xyz"
+    },
+    "description": "",
+    "dependencies": {
+        "grunt": "~0.4.0",
+        "grunt-contrib-copy": "~0.8.0",
+        "grunt-contrib-concat": "~0.3.0",
+        "grunt-contrib-uglify": "~0.9.1",
+        "grunt-contrib-watch": "~0.3.1"
+    },
+    "engines": {
+        "node": "0.8.x"
+    }
+}

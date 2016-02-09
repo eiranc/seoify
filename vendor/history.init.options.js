@@ -1,0 +1,1 @@
+window.History = { options: { delayInit: true, disableSuid: true } };
