@@ -26,8 +26,6 @@ var seoify = (function(){
         html4Mode: true,
         init: function(options) {
 
-            //console.log('seoify init', options, this);
-
             if(options && options.html4mode) {
                 History.options.html4Mode = options.html4mode;
             } else if(options && options.proximity) {
@@ -47,7 +45,6 @@ var seoify = (function(){
 
             this.active_state = History.getState().hash;
 
-            //console.log('init_hashes', this.init_path, this.root_url, this.base_url);
             var self = this;
             History.Adapter.bind(window, 'statechange', function(){
                 self.active_state = History.getState().hash;
@@ -76,7 +73,7 @@ var seoify = (function(){
             if(!this.isloaded){
             	var init_state = History.getState().hash.replace('#/','');
                 var current_hash = this.init_path+init_state;
-                //console.warn(current_hash, urlslug);
+
                 if(current_hash == urlslug){
                     this.scrolltoElement(element);
                     this.isloaded = true;
