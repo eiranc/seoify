@@ -16,6 +16,7 @@ var seoify = (function(){
 
     return {
         init_title: null,
+        init_meta: null,
         root_url: null,
         base_url: null,
         init_path: '',
@@ -38,6 +39,7 @@ var seoify = (function(){
         load: function(){
             
             this.init_title = $('title').text();
+            this.init_meta = $('meta[name="description"]').attr('content');
             this.root_url = History.getRootUrl();
             
             this.base_url = History.getBasePageUrl();
@@ -60,18 +62,19 @@ var seoify = (function(){
             $(seoifyElements).each(function(){
                 var element = $(this);
                 var title = element.attr('data-title');
+                var meta = element.attr('data-meta');
                 var urlslug = self.init_path+element.attr('data-seoify');
-                self.store(urlslug, title, element);
+                self.store(urlslug, title, meta, element);
             });
 
             var waitstate = setTimeout(function(){
                 self.wait = false;
             }, 1000); 
         },
-        store: function(urlslug, title, element) {
+        store: function(urlslug, title, meta, element) {
 
             if(!this.isloaded){
-            	var init_state = History.getState().hash.replace('#/','');
+            	var init_state = History.getState().hash.replace('#/','').replace('/','');
                 var current_hash = this.init_path+init_state;
 
                 if(current_hash == urlslug){
@@ -80,9 +83,9 @@ var seoify = (function(){
                 }
             }
             
-            this.watch(element, urlslug, title);
+            this.watch(element, urlslug, title, meta);
         },
-        watch: function(element, urlslug, title) {
+        watch: function(element, urlslug, title, meta) {
             var self = this;
             $(window).scroll(function() {
                 var elementpos = $(element).offset().top - $(window).scrollTop();
@@ -91,22 +94,27 @@ var seoify = (function(){
                 if(checkpos){
                     clearTimeout(seoify_eventBuffer);
                     var seoify_eventBuffer = setTimeout(function(){
-                        self.setpushState(urlslug, title);
+                        self.setpushState(urlslug, title, meta);
                     }, 5);
                 }
             });
         },
-        setpushState: function(slug, title){
+        setpushState: function(slug, title, meta){
             if(this.active_state != slug && !this.wait) {
                 this.active_state = slug;
                 
                 if(slug == this.init_path){
-                    window.history.replaceState(null, this.init_title, this.base_url)
+                    window.history.replaceState(null, this.init_title, this.base_url);
+                    this.setMetaDescription(this.init_meta);
                 } else {
                     History.pushState(null, title, slug);
+                    this.setMetaDescription(meta);
                 }
                 // console.log('setPushState', slug, this.active_state);
             }
+        },
+        setMetaDescription: function(meta) {
+            $('meta[name="description"]').attr('content', meta);
         },
         scrolltoElement: function(element) {
             $(element).ScrollTo();
