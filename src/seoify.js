@@ -12,7 +12,7 @@ $(function(){
 });
 
 var seoify = (function(){
-    var seoify_eventBuffer;
+    var seoify_eventBuffer, seoify_scrollBuffer;
 
     return {
         init_title: null,
@@ -24,6 +24,7 @@ var seoify = (function(){
         isloaded: false,
         wait: true,
         manualchange: true,
+        userscrolling: false,
         proximity: { near: 400, far: -100 },
         html4Mode: true,
         init: function(options) {
@@ -38,7 +39,7 @@ var seoify = (function(){
             this.load();
         },
         load: function(){
-            
+            this.scrollWheelEvents();            
             this.init_title = $('title').text();
             this.init_meta = $('meta[name="description"]').attr('content');
             this.root_url = History.getRootUrl();
@@ -52,12 +53,14 @@ var seoify = (function(){
             History.Adapter.bind(window, 'statechange', function(){
                 self.active_state = History.getState().hash;
                 console.log('History.binder', self.active_state, self.manualchange);
+                
                 if(self.manualchange == true){
                     var state = self.active_state.replace('#/','').replace('/','');
                     var element = $('body *[data-seoify="'+state+'"]');
                     console.warn('manualchange', element);
                     self.scrolltoElement(element);
                 }
+                self.manualchange = true;
             });
 
             this.setup();
@@ -98,7 +101,8 @@ var seoify = (function(){
                 var elementpos = $(element).offset().top - $(window).scrollTop();
                 var checkpos = (elementpos < self.proximity.near) && (elementpos > self.proximity.far);
 
-                if(checkpos && !self.manualchange){
+                if(checkpos && self.userscrolling){
+                    
                     clearTimeout(seoify_eventBuffer);
                     var seoify_eventBuffer = setTimeout(function(){
                         self.manualchange = false;
@@ -110,7 +114,10 @@ var seoify = (function(){
         setpushState: function(slug, title, meta){
             if(this.active_state != slug && !this.wait && !this.manualchange) {
                 this.active_state = slug;
-                
+                if(this.manualchange == true){
+                    return false;
+                }
+
                 if(slug == this.init_path){
                     window.history.replaceState(null, this.init_title, this.base_url);
                     this.setMetaDescription(this.init_meta);
@@ -119,12 +126,22 @@ var seoify = (function(){
                     this.setMetaDescription(meta);
                 }
 
-                this.manualchange = true;
+                
                 // console.log('setPushState', slug, this.active_state);
             }
         },
         setMetaDescription: function(meta) {
             $('meta[name="description"]').attr('content', meta);
+        },
+        scrollWheelEvents: function() {
+            var self = this;
+            $(window).bind('mousewheel DOMMouseScroll', function(event, delta) {
+                self.userscrolling = true;
+                clearTimeout(seoify_scrollBuffer);
+                var seoify_scrollBuffer = setTimeout(function(){
+                    self.userscrolling = false;
+                }, 5);
+            }); 
         },
         scrolltoElement: function(element) {
             $(element).ScrollTo();
