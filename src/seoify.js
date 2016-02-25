@@ -23,6 +23,7 @@ var seoify = (function(){
         active_state: null,
         isloaded: false,
         wait: true,
+        manualchange: true,
         proximity: { near: 400, far: -100 },
         html4Mode: true,
         init: function(options) {
@@ -50,7 +51,13 @@ var seoify = (function(){
             var self = this;
             History.Adapter.bind(window, 'statechange', function(){
                 self.active_state = History.getState().hash;
-                // console.log('History.binder', self.active_state);
+                console.log('History.binder', self.active_state, self.manualchange);
+                if(self.manualchange == true){
+                    var state = self.active_state.replace('#/','').replace('/','');
+                    var element = $('body *[data-seoify="'+state+'"]');
+                    console.warn('manualchange', element);
+                    self.scrolltoElement(element);
+                }
             });
 
             this.setup();
@@ -91,16 +98,17 @@ var seoify = (function(){
                 var elementpos = $(element).offset().top - $(window).scrollTop();
                 var checkpos = (elementpos < self.proximity.near) && (elementpos > self.proximity.far);
 
-                if(checkpos){
+                if(checkpos && !self.manualchange){
                     clearTimeout(seoify_eventBuffer);
                     var seoify_eventBuffer = setTimeout(function(){
+                        self.manualchange = false;
                         self.setpushState(urlslug, title, meta);
                     }, 5);
                 }
             });
         },
         setpushState: function(slug, title, meta){
-            if(this.active_state != slug && !this.wait) {
+            if(this.active_state != slug && !this.wait && !this.manualchange) {
                 this.active_state = slug;
                 
                 if(slug == this.init_path){
@@ -110,6 +118,8 @@ var seoify = (function(){
                     History.pushState(null, title, slug);
                     this.setMetaDescription(meta);
                 }
+
+                this.manualchange = true;
                 // console.log('setPushState', slug, this.active_state);
             }
         },
