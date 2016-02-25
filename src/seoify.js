@@ -52,12 +52,12 @@ var seoify = (function(){
             var self = this;
             History.Adapter.bind(window, 'statechange', function(){
                 self.active_state = History.getState().hash;
-                console.log('History.binder', self.active_state, self.manualchange);
+                //console.log('History.binder', self.active_state, self.manualchange);
                 
                 if(self.manualchange == true){
                     var state = self.active_state.replace('#/','').replace('/','');
                     var element = $('body *[data-seoify="'+state+'"]');
-                    console.warn('manualchange', element);
+                    //console.warn('manualchange', element);
                     self.scrolltoElement(element);
                 }
                 self.manualchange = true;
