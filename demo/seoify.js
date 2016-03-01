@@ -12,7 +12,7 @@ $(function(){
 });
 
 var seoify = (function(){
-    var seoify_eventBuffer, seoify_scrollBuffer;
+    var seoify_eventBuffer, seoify_scrollBuffer, seoify_inpageBuffer;
 
     return {
         init_title: null,
@@ -39,6 +39,7 @@ var seoify = (function(){
             this.load();
         },
         load: function(){
+            this.bindInPage();
             this.scrollWheelEvents();            
             this.init_title = $('title').text();
             this.init_meta = $('meta[name="description"]').attr('content');
@@ -84,7 +85,7 @@ var seoify = (function(){
         store: function(urlslug, title, meta, element) {
 
             if(!this.isloaded){
-            	var init_state = History.getState().hash.replace('#/','').replace('/','');
+                var init_state = History.getState().hash.replace('#/','').replace('/','');
                 var current_hash = this.init_path+init_state;
 
                 if(current_hash == urlslug){
@@ -129,6 +130,22 @@ var seoify = (function(){
                 
                 // console.log('setPushState', slug, this.active_state);
             }
+        },
+        bindInPage: function() {
+            var self = this;
+            $('a[data-inpage="true"]').on('click', function(e){
+                e.preventDefault();
+                var ref = $(this).attr('data-inpage-ref');
+                var element = $('body *[data-seoify="'+ref+'"]');
+
+                self.userscrolling = true;
+                self.scrolltoElement(element);
+
+                clearTimeout(seoify_inpageBuffer);
+                var seoify_inpageBuffer = setTimeout(function(){
+                    self.userscrolling = false;
+                }, 1000);
+            });
         },
         setMetaDescription: function(meta) {
             $('meta[name="description"]').attr('content', meta);
